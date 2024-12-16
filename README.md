@@ -7,3 +7,8 @@ A real time user-based messaging/chatroom webapp implemented using Django and Re
 # Running
 Launch the django backend with 
 `daphne -b 127.0.0.1 -p 8000 backend.asgi:application`
+
+# Superuser
+- Username: `mostghoste`
+- Email address: `admin@mostghoste.lt`
+- Password: `demo`
