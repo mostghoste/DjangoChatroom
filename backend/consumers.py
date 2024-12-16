@@ -3,6 +3,7 @@ import json
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        print(f"WebSocket connection attempted for room: {self.scope['url_route']['kwargs']['room_name']}")
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f"chat_{self.room_name}"
 
@@ -13,6 +14,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+
 
     async def disconnect(self, close_code):
         # Leave room group
