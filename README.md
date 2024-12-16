@@ -5,8 +5,10 @@ A real time user-based messaging/chatroom webapp implemented using Django and Re
 - Django backend handling real-time communication with websockets. Uses daphe to run the ASGI server.
 
 # Running
-Launch the django backend with 
+- Launch the django backend with 
 `daphne -b 127.0.0.1 -p 8000 backend.asgi:application`
+- Start the react frontend with
+`npm start`
 
 # Superuser
 - Username: `mostghoste`
