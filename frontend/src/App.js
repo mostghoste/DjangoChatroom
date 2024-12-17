@@ -1,20 +1,15 @@
 // frontend/src/App.js
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import ChatroomList from "./components/ChatroomList";
 import Chatroom from "./components/Chatroom";
-import Login from "./components/Login";
-import Signup from "./components/Signup";
+import AuthForm from "./components/AuthForm"; // Import the new AuthForm component
 
 function App() {
     const [username, setUsername] = useState(localStorage.getItem("username") || "");
 
-    const handleLoginSuccess = (username) => {
-        setUsername(username);
-    };
-
-    const handleSignupSuccess = (username) => {
+    const handleAuthSuccess = (username) => {
         setUsername(username);
     };
 
@@ -34,35 +29,29 @@ function App() {
                             username ? (
                                 <ChatroomList onLogout={handleLogout} />
                             ) : (
-                                <Navigate to="/login" />
+                                <Navigate to="/auth" />
                             )
                         }
                     />
                     <Route
-                        path="/login"
+                        path="/auth"
                         element={
                             username ? (
                                 <Navigate to="/" />
                             ) : (
-                                <Login onLoginSuccess={handleLoginSuccess} />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/signup"
-                        element={
-                            username ? (
-                                <Navigate to="/" />
-                            ) : (
-                                <Signup onSignupSuccess={handleSignupSuccess} />
+                                <AuthForm onAuthSuccess={handleAuthSuccess} />
                             )
                         }
                     />
                     <Route
                         path="/chatroom/:id"
                         element={
-                            username ? <Chatroom /> : <Navigate to="/login" />
+                            username ? <Chatroom /> : <Navigate to="/auth" />
                         }
+                    />
+                    <Route
+                        path="*"
+                        element={<Navigate to={username ? "/" : "/auth"} />}
                     />
                 </Routes>
             </div>
