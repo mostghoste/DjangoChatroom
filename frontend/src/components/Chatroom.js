@@ -20,14 +20,18 @@ function Chatroom() {
 
     // Initialize WebSocket connection
     useEffect(() => {
-        const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${id}/`); // Connect to the WebSocket endpoint
+        const token = localStorage.getItem("token");
+        const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${id}/?token=${token}`);
         setSocket(ws);
 
         // Handle incoming messages
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            if (data.message) {
-                setMessages((prevMessages) => [...prevMessages, { content: data.message, user: "WebSocket" }]);
+            if (data.message && data.user) {
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    { content: data.message, user: data.user },
+                ]);
             }
         };
 

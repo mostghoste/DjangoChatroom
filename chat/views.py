@@ -1,3 +1,5 @@
+# chat/views.py
+
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from .models import ChatRoom, Message

@@ -17,4 +17,6 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+axios.defaults.withCredentials = true;
+
 export default api;
