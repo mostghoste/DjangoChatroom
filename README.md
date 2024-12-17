@@ -11,9 +11,14 @@ A real time user-based messaging/chatroom webapp implemented using Django and Re
 - Start the react frontend by navigating to `cd frontend` and starting the server
 `npm start`
 
-# Superuser
+# Demo user
+## Superuser
 - Username: `mostghoste`
 - Email address: `admin@mostghoste.lt`
+- Password: `demo`
+## Tester
+- Username: `Tester`
+- Email address: `Tester@email.com`
 - Password: `demo`
 
 # Notes
