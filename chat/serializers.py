@@ -26,7 +26,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         return user
 
-
 class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
@@ -42,7 +41,18 @@ class MessageSerializer(serializers.ModelSerializer):
         read_only_fields = ['chatroom', 'user', 'timestamp']  # Automatically populated fields
 
 class InvitationSerializer(serializers.ModelSerializer):
+    sender = serializers.ReadOnlyField(source='sender.username')
+    recipient = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all()
+    )
+    chatroom = serializers.SlugRelatedField(
+        slug_field='name',
+        queryset=ChatRoom.objects.all()
+    )
+    status = serializers.CharField(read_only=True)
+    sent_at = serializers.DateTimeField(read_only=True)
+
     class Meta:
         model = Invitation
         fields = ['id', 'sender', 'recipient', 'chatroom', 'status', 'sent_at']
-        read_only_fields = ['sender', 'sent_at']  # Sender and sent_at are set automatically

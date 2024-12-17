@@ -35,6 +35,9 @@ class Invitation(models.Model):
     status = models.CharField(max_length=10, choices=INVITATION_STATUS_CHOICES, default='pending')
     sent_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('sender', 'recipient', 'chatroom')  # Prevent duplicate invitations
+        
     def __str__(self):
         return f"Invitation from {self.sender.username} to {self.recipient.username} for {self.chatroom.name}"
 

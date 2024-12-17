@@ -1,22 +1,37 @@
 # chat/views.py
 
 from rest_framework import generics, status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
+from django.db import models
 from .models import ChatRoom, Message
 from .serializers import ChatRoomSerializer, MessageSerializer, UserRegistrationSerializer
+from .permissions import IsOwner
 
 # API to create and list chatrooms
 class ChatRoomListCreateView(ListCreateAPIView):
-    queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        return ChatRoom.objects.filter(
+            models.Q(owner=user) |
+            models.Q(members__user=user)
+        ).distinct()
+
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        chatroom = serializer.save(owner=self.request.user)
+        # Automatically add the owner as a member
+        ChatRoomMembership.objects.create(user=self.request.user, chatroom=chatroom)
+
+class ChatRoomRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
+    permission_classes = [IsAuthenticated, IsOwner]
 
 # API to retrieve and send messages in a chatroom
 class MessageListCreateView(ListCreateAPIView):
@@ -52,3 +67,33 @@ class UserRegistrationView(generics.CreateAPIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class InvitationCreateView(generics.CreateAPIView):
+    serializer_class = InvitationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        sender = request.user
+        recipient = serializer.validated_data['recipient']
+        chatroom = serializer.validated_data['chatroom']
+
+        # Check if sender is a member of the chatroom
+        if not ChatRoomMembership.objects.filter(user=sender, chatroom=chatroom).exists():
+            return Response({"detail": "You are not a member of this chatroom."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Prevent inviting oneself
+        if sender == recipient:
+            return Response({"detail": "You cannot invite yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the invitation
+        invitation, created = Invitation.objects.get_or_create(
+            sender=sender,
+            recipient=recipient,
+            chatroom=chatroom
+        )
+        if not created:
+            return Response({"detail": "Invitation already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(InvitationSerializer(invitation).data, status=status.HTTP_201_CREATED, headers=headers)

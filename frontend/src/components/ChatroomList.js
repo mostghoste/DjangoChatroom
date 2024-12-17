@@ -42,7 +42,6 @@ function ChatroomList({ onLogout }) {
                     </li>
                 ))}
             </ul>
-            <Link to="/signup" className="signup-link">Sign Up</Link>
         </div>
     );
 }
