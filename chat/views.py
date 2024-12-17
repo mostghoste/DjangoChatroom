@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.shortcuts import get_object_or_404
 
-from .models import ChatRoom, Message, Invitation, ChatrRoomMembership
+from .models import ChatRoom, Message, Invitation, ChatRoomMembership
 from .serializers import (
     ChatRoomSerializer,
     MessageSerializer,
@@ -177,7 +177,8 @@ class DeclineInvitationView(UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ChatRoomMembersView(generics.ListAPIView):
-    serializer_class = UserRegistrationSerializer  # Alternatively, create a UserSerializer
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         chatroom_id = self.kwargs['chatroom_id']
