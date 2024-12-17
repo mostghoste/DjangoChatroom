@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import api from "../api";
+// frontend/src/components/ChatroomList.js
 
-function ChatroomList() {
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api";
+import "./ChatroomList.css"; // Create and style this CSS file as needed
+
+function ChatroomList({ onLogout }) {
     const [chatrooms, setChatrooms] = useState([]);
-    const [token, setToken] = useState(localStorage.getItem("token") || "");
+    const [username, setUsername] = useState(localStorage.getItem("username") || "");
+    const navigate = useNavigate();
 
     const fetchChatrooms = async () => {
         try {
@@ -15,41 +19,30 @@ function ChatroomList() {
         }
     };
 
-    const login = async () => {
-        try {
-            const response = await api.post("/token/", {
-                username: "mostghoste",
-                password: "demo",
-            });
-            const token = response.data.token;
-            localStorage.setItem("token", token);
-            setToken(token);
-            fetchChatrooms();
-        } catch (error) {
-            console.error("Login failed:", error);
-        }
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        onLogout();
+        navigate("/login");
     };
 
     useEffect(() => {
-        if (token) fetchChatrooms();
-    }, [token]);
+        fetchChatrooms();
+    }, []);
 
     return (
-        <div>
-            {!token ? (
-                <button onClick={login}>Login</button>
-            ) : (
-                <div>
-                    <h2>Chatrooms</h2>
-                    <ul>
-                        {chatrooms.map((room) => (
-                            <li key={room.id}>
-                                <Link to={`/chatroom/${room.id}`}>{room.name}</Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+        <div className="chatroom-list-container">
+            <h2>Welcome, {username}!</h2>
+            <button onClick={handleLogout} className="logout-button">Logout</button>
+            <h2>Chatrooms</h2>
+            <ul>
+                {chatrooms.map((room) => (
+                    <li key={room.id}>
+                        <Link to={`/chatroom/${room.id}`}>{room.name}</Link>
+                    </li>
+                ))}
+            </ul>
+            <Link to="/signup" className="signup-link">Sign Up</Link>
         </div>
     );
 }

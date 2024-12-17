@@ -3,6 +3,7 @@ A real time user-based messaging/chatroom webapp implemented using Django and Re
 
 # Overview
 - Django backend handling real-time communication with websockets. Uses daphe to run the ASGI server.
+- React frontend communicating with the backend via the API using axios
 
 # Running
 - Launch the django backend with 
@@ -14,3 +15,6 @@ A real time user-based messaging/chatroom webapp implemented using Django and Re
 - Username: `mostghoste`
 - Email address: `admin@mostghoste.lt`
 - Password: `demo`
+
+# Notes
+- For authentication, the user token is stored in the browser localStorage. It works, but may be succeptible to cross site scripting attacks.
