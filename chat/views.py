@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.db import models
 from .models import ChatRoom, Message
-from .serializers import ChatRoomSerializer, MessageSerializer, UserRegistrationSerializer
+from .serializers import ChatRoomSerializer, MessageSerializer, UserRegistrationSerializer, InvitationSerializer
 from .permissions import IsOwner
 
 # API to create and list chatrooms
@@ -97,3 +97,17 @@ class InvitationCreateView(generics.CreateAPIView):
 
         headers = self.get_success_headers(serializer.data)
         return Response(InvitationSerializer(invitation).data, status=status.HTTP_201_CREATED, headers=headers)
+
+class ChatRoomMembersView(generics.ListAPIView):
+    serializer_class = UserRegistrationSerializer  # Alternatively, create a UserSerializer
+
+    def get_queryset(self):
+        chatroom_id = self.kwargs['chatroom_id']
+        user = self.request.user
+
+        # Check if user is a member of the chatroom
+        if not ChatRoomMembership.objects.filter(user=user, chatroom__id=chatroom_id).exists():
+            return User.objects.none()
+
+        # Return all members of the chatroom
+        return User.objects.filter(chatroom_memberships__chatroom__id=chatroom_id)
