@@ -64,16 +64,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logger.info(f"Processing message: {message}")
 
             # Save message to the database
-            await self.save_message(message)
-            logger.info(f"Saved message: {message} to database.")
+            saved_message = await self.save_message(message)
+            if not saved_message:
+                logger.error("Failed to save message.")
+                return
 
-            # Broadcast message to room group
+            # Broadcast message to room group with actual username
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",
                     "message": message,
-                    "user": "WebSocket",  # Replace with actual user if authentication is added
+                    "user": self.scope["user"].username,  # Use actual username
+                    "timestamp": saved_message.timestamp.isoformat(),
                 }
             )
         except Exception as e:
@@ -84,13 +87,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             message = event.get("message")
             user = event.get("user", "Unknown")
+            timestamp = event.get("timestamp")
 
             # Send message to WebSocket
             await self.send(text_data=json.dumps({
                 "message": message,
                 "user": user,
+                "timestamp": timestamp,
             }))
-            logger.info(f"Message sent to WebSocket: {message} from {user}")
+            logger.info(f"Message sent to WebSocket: {message} from {user} at {timestamp}")
         except Exception as e:
             logger.error(f"Error sending message to WebSocket: {e}")
 
@@ -106,7 +111,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Token.DoesNotExist:
             logger.warning(f"Invalid token: {token}")
             return AnonymousUser()
-
 
     @database_sync_to_async
     def save_message(self, content):
@@ -129,6 +133,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error saving message to database: {e}")
             return None
-
-
-

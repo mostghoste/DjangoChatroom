@@ -1,3 +1,5 @@
+// frontend/src/components/Chatroom.js
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api";
@@ -30,7 +32,7 @@ function Chatroom() {
             if (data.message && data.user) {
                 setMessages((prevMessages) => [
                     ...prevMessages,
-                    { content: data.message, user: data.user },
+                    { content: data.message, user: data.user, timestamp: data.timestamp },
                 ]);
             }
         };
@@ -59,7 +61,7 @@ function Chatroom() {
             <div>
                 {messages.map((msg, index) => (
                     <p key={index}>
-                        <strong>{msg.user || "User"}:</strong> {msg.content}
+                        <strong>{msg.user || "User"}:</strong> {msg.content} <em>({new Date(msg.timestamp).toLocaleTimeString()})</em>
                     </p>
                 ))}
             </div>
