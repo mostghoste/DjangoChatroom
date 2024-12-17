@@ -1,14 +1,14 @@
 # DjangoChatroom
-A real time user-based messaging/chatroom webapp implemented using Django and React
+A real time user-based messaging/chatroom webapp implemented using Django and React.
 
 # Overview
-- Django backend handling real-time communication with websockets. Uses daphe to run the ASGI server.
-- React frontend communicating with the backend via the API using axios
+- Django backend handling real-time communication with websockets. Uses daphne to run the ASGI server.
+- React frontend communicating with the backend via the API using axios.
 
 # Running
 - Launch the django backend with 
 `daphne -b 127.0.0.1 -p 8000 backend.asgi:application`
-- Start the react frontend with
+- Start the react frontend by navigating to `cd frontend` and starting the server
 `npm start`
 
 # Superuser
