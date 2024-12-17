@@ -24,8 +24,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             email=validated_data.get('email', ''),
             password=validated_data['password']
         )
-        Token.objects.create(user=user)  # Create a token for the new user
         return user
+
 
 class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:

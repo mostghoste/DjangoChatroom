@@ -3,6 +3,9 @@
 from rest_framework import generics, status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
 from .models import ChatRoom, Message
 from .serializers import ChatRoomSerializer, MessageSerializer, UserRegistrationSerializer
 
@@ -35,7 +38,11 @@ class UserRegistrationView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token = Token.objects.get(user=user)
+            try:
+                token = Token.objects.get(user=user)
+            except Token.DoesNotExist:
+                # Handle the case where the token wasn't created for some reason
+                token = Token.objects.create(user=user)
             return Response({
                 "user": {
                     "username": user.username,
@@ -44,3 +51,4 @@ class UserRegistrationView(generics.CreateAPIView):
                 "token": token.key
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
