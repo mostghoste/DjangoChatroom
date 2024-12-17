@@ -1,15 +1,28 @@
 # chat/views.py
 
 from rest_framework import generics, status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    ListAPIView,
+    UpdateAPIView
+)
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.db import models
-from .models import ChatRoom, Message
-from .serializers import ChatRoomSerializer, MessageSerializer, UserRegistrationSerializer, InvitationSerializer
-from .permissions import IsOwner
+from django.shortcuts import get_object_or_404
+
+from .models import ChatRoom, Message, Invitation, ChatrRoomMembership
+from .serializers import (
+    ChatRoomSerializer,
+    MessageSerializer,
+    UserRegistrationSerializer,
+    InvitationSerializer,
+    UserSerializer
+)
+from .permissions import IsOwner, IsOwnerOrMember
 
 # API to create and list chatrooms
 class ChatRoomListCreateView(ListCreateAPIView):
@@ -28,10 +41,17 @@ class ChatRoomListCreateView(ListCreateAPIView):
         # Automatically add the owner as a member
         ChatRoomMembership.objects.create(user=self.request.user, chatroom=chatroom)
 
+# API to retrieve, update, and delete a chatroom
 class ChatRoomRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwnerOrMember]
+
+    def get_queryset(self):
+        user = self.request.user
+        return ChatRoom.objects.filter(
+            models.Q(owner=user) |
+            models.Q(members__user=user)
+        ).distinct()
 
 # API to retrieve and send messages in a chatroom
 class MessageListCreateView(ListCreateAPIView):
@@ -40,7 +60,13 @@ class MessageListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         chatroom_id = self.kwargs['chatroom_id']
-        return Message.objects.filter(chatroom__id=chatroom_id)
+        user = self.request.user
+
+        # Ensure the user is a member of the chatroom
+        if not ChatRoomMembership.objects.filter(user=user, chatroom__id=chatroom_id).exists():
+            return Message.objects.none()
+
+        return Message.objects.filter(chatroom__id=chatroom_id).order_by('timestamp')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, chatroom_id=self.kwargs['chatroom_id'])
@@ -86,6 +112,10 @@ class InvitationCreateView(generics.CreateAPIView):
         if sender == recipient:
             return Response({"detail": "You cannot invite yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Check if recipient is already a member
+        if ChatRoomMembership.objects.filter(user=recipient, chatroom=chatroom).exists():
+            return Response({"detail": "User is already a member of this chatroom."}, status=status.HTTP_400_BAD_REQUEST)
+
         # Create the invitation
         invitation, created = Invitation.objects.get_or_create(
             sender=sender,
@@ -97,6 +127,54 @@ class InvitationCreateView(generics.CreateAPIView):
 
         headers = self.get_success_headers(serializer.data)
         return Response(InvitationSerializer(invitation).data, status=status.HTTP_201_CREATED, headers=headers)
+
+# API to list incoming invitations
+class IncomingInvitationsView(ListAPIView):
+    serializer_class = InvitationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Invitation.objects.filter(recipient=user, status='pending')
+
+# API to accept an invitation
+class AcceptInvitationView(UpdateAPIView):
+    serializer_class = InvitationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        invitation_id = self.kwargs['invitation_id']
+        invitation = get_object_or_404(Invitation, id=invitation_id, recipient=self.request.user, status='pending')
+        return invitation
+
+    def update(self, request, *args, **kwargs):
+        invitation = self.get_object()
+        invitation.status = 'accepted'
+        invitation.save()
+
+        # Add user to ChatRoomMembership
+        ChatRoomMembership.objects.create(user=request.user, chatroom=invitation.chatroom)
+
+        serializer = self.get_serializer(invitation)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+# API to decline an invitation
+class DeclineInvitationView(UpdateAPIView):
+    serializer_class = InvitationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        invitation_id = self.kwargs['invitation_id']
+        invitation = get_object_or_404(Invitation, id=invitation_id, recipient=self.request.user, status='pending')
+        return invitation
+
+    def update(self, request, *args, **kwargs):
+        invitation = self.get_object()
+        invitation.status = 'rejected'
+        invitation.save()
+
+        serializer = self.get_serializer(invitation)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ChatRoomMembersView(generics.ListAPIView):
     serializer_class = UserRegistrationSerializer  # Alternatively, create a UserSerializer

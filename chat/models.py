@@ -18,6 +18,9 @@ class ChatRoomMembership(models.Model):
     chatroom = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='members')
     joined_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'chatroom')  # Prevent duplicate memberships
+
     def __str__(self):
         return f"{self.user.username} in {self.chatroom.name}"
 
@@ -37,7 +40,7 @@ class Invitation(models.Model):
 
     class Meta:
         unique_together = ('sender', 'recipient', 'chatroom')  # Prevent duplicate invitations
-        
+
     def __str__(self):
         return f"Invitation from {self.sender.username} to {self.recipient.username} for {self.chatroom.name}"
 

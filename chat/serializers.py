@@ -27,10 +27,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 class ChatRoomSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = ChatRoom
         fields = ['id', 'name', 'owner', 'created_at']
-        read_only_fields = ['owner', 'created_at']  # Owner and created_at are set automatically
+        read_only_fields = ['owner', 'created_at']
 
 class MessageSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')  # Display username instead of user ID

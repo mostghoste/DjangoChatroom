@@ -1,6 +1,7 @@
 # chat/permissions.py
 
 from rest_framework import permissions
+from .models import ChatRoomMembership
 
 class IsOwner(permissions.BasePermission):
     """
@@ -15,3 +16,11 @@ class IsOwner(permissions.BasePermission):
 
         # Write permissions are only allowed to the owner of the chatroom.
         return obj.owner == request.user
+
+class IsOwnerOrMember(permissions.BasePermission):
+    """
+    Custom permission to allow access only to owners or members of a chatroom.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user or ChatRoomMembership.objects.filter(chatroom=obj, user=request.user).exists()
