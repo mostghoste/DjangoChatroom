@@ -1,0 +1,120 @@
+.chatroom-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+.members-container {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+}
+
+.members-container h3 {
+    margin-bottom: 10px;
+}
+
+.members-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.members-container li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.messages-container {
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+.messages-container p {
+    margin: 5px 0;
+}
+
+.message-input-container {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+}
+
+.message-input-container input {
+    flex: 1;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+}
+
+.message-input-container button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff; /* Blue */
+    color: white;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    font-size: 1em;
+}
+
+.message-input-container button:hover {
+    background-color: #0056b3;
+}
+
+.invite-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+}
+
+.invite-container h3 {
+    margin-bottom: 10px;
+}
+
+.invite-container form {
+    display: flex;
+    align-items: center;
+}
+
+.invite-container input {
+    flex: 1;
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+}
+
+.invite-container button {
+    padding: 8px 16px;
+    border: none;
+    background-color: #28a745; /* Green */
+    color: white;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    font-size: 1em;
+}
+
+.invite-container button:hover {
+    background-color: #218838;
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+}
+
+.success {
+    color: green;
+    margin-top: 10px;
+}

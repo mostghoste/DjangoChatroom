@@ -1,10 +1,9 @@
-// frontend/src/App.js
-
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import ChatroomList from "./components/ChatroomList";
 import Chatroom from "./components/Chatroom";
-import AuthForm from "./components/AuthForm"; // Import the new AuthForm component
+import AuthForm from "./components/AuthForm";
+import InvitationList from "./components/InvitationList"; // Import the new InvitationList component
 
 function App() {
     const [username, setUsername] = useState(localStorage.getItem("username") || "");
@@ -47,6 +46,12 @@ function App() {
                         path="/chatroom/:id"
                         element={
                             username ? <Chatroom /> : <Navigate to="/auth" />
+                        }
+                    />
+                    <Route
+                        path="/invitations"
+                        element={
+                            username ? <InvitationList /> : <Navigate to="/auth" />
                         }
                     />
                     <Route

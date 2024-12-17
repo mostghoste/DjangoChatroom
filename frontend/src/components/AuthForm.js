@@ -14,6 +14,7 @@ function AuthForm({ onAuthSuccess }) {
 
     const handleToggle = () => {
         setIsSignup(!isSignup);
+        setError("");
     };
 
     const handleSubmit = async (e) => {

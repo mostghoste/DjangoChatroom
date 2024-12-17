@@ -48,3 +48,13 @@
 .signup-link:hover {
     text-decoration: underline;
 }
+
+.invitation-link {
+    margin-top: 20px;
+    color: #17a2b8; /* Teal */
+    text-decoration: none;
+}
+
+.invitation-link:hover {
+    text-decoration: underline;
+}

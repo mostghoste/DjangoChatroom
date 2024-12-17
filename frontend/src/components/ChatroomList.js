@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
-import "./ChatroomList.css"; // Create and style this CSS file as needed
+import "./ChatroomList.css";
 
 function ChatroomList({ onLogout }) {
     const [chatrooms, setChatrooms] = useState([]);
     const [username, setUsername] = useState(localStorage.getItem("username") || "");
+    const [newChatroomName, setNewChatroomName] = useState("");
+    const [error, setError] = useState("");
     const navigate = useNavigate();
 
     const fetchChatrooms = async () => {
@@ -23,7 +25,24 @@ function ChatroomList({ onLogout }) {
         localStorage.removeItem("token");
         localStorage.removeItem("username");
         onLogout();
-        navigate("/login");
+        navigate("/auth");
+    };
+
+    const handleCreateChatroom = async (e) => {
+        e.preventDefault();
+        setError("");
+        if (!newChatroomName.trim()) {
+            setError("Chatroom name cannot be empty.");
+            return;
+        }
+        try {
+            const response = await api.post("/chatrooms/", { name: newChatroomName });
+            setChatrooms([...chatrooms, response.data]);
+            setNewChatroomName("");
+        } catch (err) {
+            console.error("Error creating chatroom:", err.response);
+            setError(err.response.data.detail || "Failed to create chatroom.");
+        }
     };
 
     useEffect(() => {
@@ -42,6 +61,18 @@ function ChatroomList({ onLogout }) {
                     </li>
                 ))}
             </ul>
+            <form onSubmit={handleCreateChatroom} className="create-chatroom-form">
+                <input
+                    type="text"
+                    value={newChatroomName}
+                    onChange={(e) => setNewChatroomName(e.target.value)}
+                    placeholder="New Chatroom Name"
+                    required
+                />
+                <button type="submit">Create Chatroom</button>
+            </form>
+            {error && <p className="error">{error}</p>}
+            <Link to="/invitations" className="invitation-link">View Invitations</Link>
         </div>
     );
 }

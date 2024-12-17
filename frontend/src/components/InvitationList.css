@@ -1,0 +1,73 @@
+.invitation-list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 50px auto;
+    max-width: 600px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.invitation-list-container h2 {
+    margin-bottom: 20px;
+}
+
+.invitation-list-container ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+.invitation-list-container li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.invitation-list-container li p {
+    margin: 0 0 10px 0;
+}
+
+.invitation-list-container button {
+    margin-right: 10px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.invitation-list-container button:first-of-type {
+    background-color: #28a745; /* Green for Accept */
+    color: white;
+}
+
+.invitation-list-container button:first-of-type:hover {
+    background-color: #218838;
+}
+
+.invitation-list-container button:last-of-type {
+    background-color: #dc3545; /* Red for Decline */
+    color: white;
+}
+
+.invitation-list-container button:last-of-type:hover {
+    background-color: #c82333;
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+}
+
+.success {
+    color: green;
+    margin-top: 10px;
+}
