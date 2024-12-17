@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api";
-import "./Chatroom.css"; // Create and style this CSS file as needed
+import "./Chatroom.css"; // Ensure this CSS file includes styles for members-container
 
 function Chatroom() {
     const { id } = useParams(); // Chatroom ID from URL
     const [messages, setMessages] = useState([]);
+    const [members, setMembers] = useState([]); // State for chatroom members
     const [content, setContent] = useState("");
     const [socket, setSocket] = useState(null);
     const [chatroomName, setChatroomName] = useState("");
@@ -15,7 +16,7 @@ function Chatroom() {
     const [inviteError, setInviteError] = useState("");
     const [inviteSuccess, setInviteSuccess] = useState("");
 
-    // Fetch chatroom details and messages
+    // Fetch chatroom details, messages, and members
     const fetchChatroomDetails = async () => {
         try {
             const response = await api.get(`/chatrooms/${id}/`);
@@ -31,6 +32,15 @@ function Chatroom() {
             setMessages(response.data);
         } catch (error) {
             console.error("Error fetching messages:", error);
+        }
+    };
+
+    const fetchMembers = async () => {
+        try {
+            const response = await api.get(`/chatrooms/${id}/members/`);
+            setMembers(response.data);
+        } catch (error) {
+            console.error("Error fetching members:", error);
         }
     };
 
@@ -57,6 +67,13 @@ function Chatroom() {
         return () => ws.close(); // Cleanup on unmount
     }, [id]);
 
+    // Fetch chatroom details, messages, and members on mount
+    useEffect(() => {
+        fetchChatroomDetails();
+        fetchMessages();
+        fetchMembers();
+    }, [id]);
+
     // Send a message via WebSocket
     const sendMessage = () => {
         if (socket && content.trim()) {
@@ -81,27 +98,38 @@ function Chatroom() {
             });
             setInviteSuccess(`Invitation sent to ${inviteUsername}.`);
             setInviteUsername("");
+            fetchMembers(); // Refresh members list after sending invitation
         } catch (err) {
             console.error("Error sending invitation:", err.response);
             setInviteError(err.response.data.detail || "Failed to send invitation.");
         }
     };
 
-    useEffect(() => {
-        fetchChatroomDetails();
-        fetchMessages(); // Load initial messages when component mounts
-    }, [id]);
-
     return (
         <div className="chatroom-container">
             <h2>Chatroom: {chatroomName}</h2>
+
+            {/* Members List */}
+            <div className="members-container">
+                <h3>Members</h3>
+                <ul>
+                    {members.map((member) => (
+                        <li key={member.id}>{member.username}</li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Messages */}
             <div className="messages-container">
                 {messages.map((msg, index) => (
                     <p key={index}>
-                        <strong>{msg.user || "User"}:</strong> {msg.content} <em>({new Date(msg.timestamp).toLocaleTimeString()})</em>
+                        <strong>{msg.user || "User"}:</strong> {msg.content}{" "}
+                        <em>({new Date(msg.timestamp).toLocaleTimeString()})</em>
                     </p>
                 ))}
             </div>
+
+            {/* Message Input */}
             <div className="message-input-container">
                 <input
                     type="text"
@@ -111,6 +139,8 @@ function Chatroom() {
                 />
                 <button onClick={sendMessage}>Send</button>
             </div>
+
+            {/* Invite User */}
             <div className="invite-container">
                 <h3>Invite User</h3>
                 <form onSubmit={handleInvite}>
