@@ -2,6 +2,9 @@
 
 A real-time user-based messaging/chatroom web application built with Django and React.
 
+## Showcase
+A showcase of DjangoChatroom [ can be found in video format here](https://www.youtube.com/watch?v=HIivyTZ2d38).
+
 ## Overview
 - **Backend:** Django with Django Channels for real-time communication using WebSockets. Runs on the ASGI server with Daphne.
 - **Frontend:** React application communicating with the backend via REST APIs using Axios.
