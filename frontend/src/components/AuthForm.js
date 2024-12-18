@@ -65,7 +65,8 @@ function AuthForm({ onAuthSuccess }) {
     };
 
     return (
-        <div className="auth-form-container">
+        <div className="screen">
+            <div className="auth-form-container">
             <h2>{isSignup ? "Sign Up" : "Login"}</h2>
             {error && <p className="error">{error}</p>}
             <form onSubmit={handleSubmit}>
@@ -109,6 +110,7 @@ function AuthForm({ onAuthSuccess }) {
                     {isSignup ? "Login" : "Sign Up"}
                 </button>
             </p>
+        </div>
         </div>
     );
 }
